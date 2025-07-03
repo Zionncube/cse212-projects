@@ -19,7 +19,6 @@ public static class StandardDeviation {
             total += number;
             count += 1;
         }
-
         var avg = total / count;
         var sumSquaredDifferences = 0.0;
         foreach (var number in numbers) {
