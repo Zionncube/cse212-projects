@@ -1,35 +1,48 @@
-/// <summary>
-/// A basic implementation of a Queue
-/// </summary>
-public class PersonQueue
+public class TakingTurnsQueue
 {
-    private readonly List<Person> _queue = new();
+    private class PersonNode
+    {
+        public Person Person { get; }
+        public int RemainingTurns { get; set; }
+
+        public PersonNode(Person person)
+        {
+            Person = person;
+            RemainingTurns = person.Turns;
+        }
+    }
+
+    private readonly Queue<PersonNode> _queue = new();
 
     public int Length => _queue.Count;
 
-    /// <summary>
-    /// Add a person to the queue
-    /// </summary>
-    /// <param name="person">The person to add</param>
-    public void Enqueue(Person person)
+    public void AddPerson(string name, int turns)
     {
-        _queue.Insert(0, person);
+        var person = new Person(name, turns);
+        _queue.Enqueue(new PersonNode(person));
     }
 
-    public Person Dequeue()
+    public Person GetNextPerson()
     {
-        var person = _queue[0];
-        _queue.RemoveAt(0);
-        return person;
-    }
+        if (_queue.Count == 0)
+        {
+            throw new InvalidOperationException("No one in the queue.");
+        }
 
-    public bool IsEmpty()
-    {
-        return Length == 0;
-    }
+        var node = _queue.Dequeue();
 
-    public override string ToString()
-    {
-        return $"[{string.Join(", ", _queue)}]";
+        if (node.Person.Turns <= 0) // Infinite turns
+        {
+            _queue.Enqueue(node);
+            return node.Person;
+        }
+
+        if (node.RemainingTurns > 1)
+        {
+            node.RemainingTurns--;
+            _queue.Enqueue(node);
+        }
+
+        return node.Person;
     }
 }
