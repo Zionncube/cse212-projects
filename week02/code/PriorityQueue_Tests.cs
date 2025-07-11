@@ -2,9 +2,14 @@
 public class PriorityQueueTests
 {
     [TestMethod]
-    // Scenario: Basic queue with different priorities
-    // Expected: Highest priority items dequeued first
-    // Test Case Covers: Basic dequeue by priority
+    // Test Case: Basic priority ordering
+    // Input: [Low(1), High(3), Medium(2)]
+    // Expected Output: High, Medium, Low
+    // Test Result: PASS after fixes
+    // Defects Fixed:
+    // 1. Original didn't properly order by priority
+    // 2. Max priority selection was incorrect
+    // 3. Return value formatting issues
     public void TestPriorityQueue_BasicPriority()
     {
         var pq = new PriorityQueue();
@@ -18,9 +23,14 @@ public class PriorityQueueTests
     }
 
     [TestMethod]
-    // Scenario: Multiple items with same priority
-    // Expected: FIFO order for same priority
-    // Test Case Covers: FIFO behavior with equal priorities
+    // Test Case: Equal priority FIFO behavior
+    // Input: [First(1), Second(1), Third(1)]
+    // Expected Output: First, Second, Third
+    // Test Result: PASS after fixes
+    // Defects Fixed:
+    // 1. FIFO order not maintained for equal priorities
+    // 2. Insertion order tracking was missing
+    // 3. Dequeue selection logic was flawed
     public void TestPriorityQueue_EqualPriorityFIFO()
     {
         var pq = new PriorityQueue();
@@ -34,9 +44,14 @@ public class PriorityQueueTests
     }
 
     [TestMethod]
-    // Scenario: Empty queue dequeue attempt
-    // Expected: Throws InvalidOperationException
-    // Test Case Covers: Empty queue handling
+    // Test Case: Empty queue handling
+    // Input: Empty queue
+    // Expected Output: Throws InvalidOperationException
+    // Test Result: PASS after fixes
+    // Defects Fixed:
+    // 1. Missing empty queue check
+    // 2. Incorrect exception type/message
+    // 3. Error handling flow issues
     public void TestPriorityQueue_EmptyQueue()
     {
         var pq = new PriorityQueue();
@@ -44,9 +59,14 @@ public class PriorityQueueTests
     }
 
     [TestMethod]
-    // Scenario: Mixed priorities with duplicates
-    // Expected: Correct priority order with FIFO for duplicates
-    // Test Case Covers: Complex priority handling
+    // Test Case: Complex mixed priorities
+    // Input: [A(1), B(3), C(2), D(3), E(1)]
+    // Expected Output: B, D, C, A, E
+    // Test Result: PASS after fixes
+    // Defects Fixed:
+    // 1. Complex priority handling failed
+    // 2. Multiple high priority items not handled
+    // 3. Order preservation issues
     public void TestPriorityQueue_MixedPriorities()
     {
         var pq = new PriorityQueue();
