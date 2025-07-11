@@ -9,9 +9,35 @@
 /// </summary>
 public class TakingTurnsQueue
 {
-    private readonly PersonQueue _people = new();
+    /// <summary>
+    /// Internal class to track queue items with their turn information
+    /// </summary>
+    private class QueueItem
+    {
+        public string Name { get; }               // Person's name (immutable)
+        public int OriginalTurns { get; }         // Original number of turns specified
+        public int? RemainingTurns { get; set; }  // Remaining turns (null = infinite)
 
-    public int Length => _people.Length;
+        /// <summary>
+        /// Initialize a new queue item
+        /// </summary>
+        /// <param name="name">Person's name</param>
+        /// <param name="turns">
+        /// Number of turns: 
+        ///   >0 : finite turns
+        ///   ≤0 : infinite turns (marked with null)
+        /// </param>
+        public QueueItem(string name, int turns)
+        {
+            Name = name;
+            OriginalTurns = turns;
+            // Set remaining turns - null means infinite
+            RemainingTurns = turns <= 0 ? null : turns;
+        }
+    }
+
+    private readonly Queue<QueueItem> _queue = new();  // Main queue storage
+    public int Length => _queue.Count;                 // Current queue length
 
     /// <summary>
     /// Add new people to the queue with a name and number of turns
@@ -20,8 +46,8 @@ public class TakingTurnsQueue
     /// <param name="turns">Number of turns remaining</param>
     public void AddPerson(string name, int turns)
     {
-        var person = new Person(name, turns);
-        _people.Enqueue(person);
+        // Create new QueueItem and add to end of queue
+        _queue.Enqueue(new QueueItem(name, turns));
     }
 
     /// <summary>
@@ -33,25 +59,42 @@ public class TakingTurnsQueue
     /// </summary>
     public Person GetNextPerson()
     {
-        if (_people.IsEmpty())
+        if (_queue.Count == 0)  // Check if queue is empty
         {
             throw new InvalidOperationException("No one in the queue.");
         }
-        else
-        {
-            Person person = _people.Dequeue();
-            if (person.Turns > 1)
-            {
-                person.Turns -= 1;
-                _people.Enqueue(person);
-            }
 
-            return person;
+        // Get next person from front of queue
+        var item = _queue.Dequeue();
+        
+        // Handle infinite turns case (turns ≤ 0)
+        if (!item.RemainingTurns.HasValue)
+        {
+            // Always requeue people with infinite turns
+            _queue.Enqueue(item);
+            // Return new Person with original turn count
+            return new Person(item.Name, item.OriginalTurns);
         }
+        
+        // Handle finite turns case
+        if (item.RemainingTurns > 1)
+        {
+            // Decrement turns and requeue if turns remain
+            item.RemainingTurns--;
+            _queue.Enqueue(item);
+        }
+        // Note: If RemainingTurns == 1, this was their last turn (don't requeue)
+
+        // Return new Person with original turn count
+        return new Person(item.Name, item.OriginalTurns);
     }
 
+    /// <summary>
+    /// Generate string representation of queue
+    /// </summary>
     public override string ToString()
     {
-        return _people.ToString();
+        return string.Join(", ", _queue.Select(item => 
+            $"{item.Name} ({item.RemainingTurns?.ToString() ?? "∞"})"));
     }
 }
